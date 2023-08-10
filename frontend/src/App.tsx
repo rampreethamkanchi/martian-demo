@@ -2,8 +2,6 @@ import React, {useEffect, useState} from 'react';
 import './App.css';
 import { Types, AptosClient } from 'aptos';
 
-const client = new AptosClient('https://fullnode.testnet.aptoslabs.com');
-
 const gameAddress = '0x61315d864828f1508e77744a0f05c26bb10dafbe8a669b894eefb2114016e7f6'
 
 function App() {
@@ -20,6 +18,7 @@ function App() {
    */
   const init = async() => {
     // connect
+    try {
     if (window && (!window.martian || !window.martian.internal)) {
       console.log('Martian not found')
       return { aptos: [], sui: [] };
@@ -32,6 +31,9 @@ function App() {
     const publicKey = result.aptos[0].publicKey;
     setAddress(address);
     setPublicKey(publicKey);
+  } catch (e) {
+    console.log(e);
+  }
   }
   
   useEffect(() => {
