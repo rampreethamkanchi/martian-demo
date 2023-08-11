@@ -19,12 +19,12 @@ function App() {
   const init = async() => {
     // connect
     try {
-    if (window && (!window.martian || !window.martian.internal)) {
+    if (window && (!window.martian)) {
       console.log('Martian not found')
       return { aptos: [], sui: [] };
     }
 
-    const data = await window.martian.internal.connect();
+    const data = await window.martian.connect();
 
     const { result } = data;
     const address = result.aptos[0].address;
