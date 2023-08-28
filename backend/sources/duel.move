@@ -6,16 +6,16 @@ module duel::game {
     use std::signer;
 
     // COMMENTED OUT FOR NOW
-    // struct Duel has key, store {
-    //     // the player who initiated the duel
-    //     player: address,
-    //     // the player who accepted the duel
-    //     opponent: address,
-    //     // the amount of coins wagered by the player
-    //     wager: Coin<DuelToken>,
-    //     // the player's card
-    //     player_card: CARD,
-    // }
+    struct Duel has key, store {
+        // the player who initiated the duel
+        player: address,
+        // the player who accepted the duel
+        opponent: address,
+        // the amount of coins wagered by the player
+        wager: Coin<DuelToken>,
+        // the player's card
+        player_card: CARD,
+    }
 
     struct CARD has key, store {
         power: u64,
@@ -61,43 +61,43 @@ module duel::game {
         })
     }
 
+   // COMMENTED OUT FOR NOW
+    public entry fun duel_player1(player1: &signer, player2: address, wager: u64, card: &mut CARD) {
+        assert!(signer::address_of(player1) != player2, ERR_UNAUTHORIZED);
+        assert!(coin::balance<DuelToken>(signer::address_of(player1)) >= wager, ERR_INSUFFICIENT_FUNDS);
+
+        move_to(player1, Duel {
+            player: signer::address_of(player1),
+            opponent: player2,
+            wager: coin::withdraw<DuelToken>(player1, wager),
+            player_card: card,
+        })
+    }
+
     // COMMENTED OUT FOR NOW
-    // public entry fun duel_player1(player1: &signer, player2: address, wager: u64, card: &mut CARD) {
-    //     assert!(signer::address_of(player1) != player2, ERR_UNAUTHORIZED);
-    //     assert!(coin::balance<DuelToken>(signer::address_of(player1)) >= wager, ERR_INSUFFICIENT_FUNDS);
+    public entry fun duel_player2(player2: &signer, player1: address, wager: u64, card: &mut CARD, duel: Duel) {
+        assert!(coin::balance<DuelToken>(signer::address_of(player2)) >= wager, ERR_INSUFFICIENT_FUNDS);
+        assert!(player1 == duel.player, ERR_INCORRECT_OPPONENT);
 
-    //     move_to(player1, Duel {
-    //         player: signer::address_of(player1),
-    //         opponent: player2,
-    //         wager: coin::withdraw<DuelToken>(player1, wager),
-    //         player_card: card,
-    //     })
-    // }
-
-    // COMMENTED OUT FOR NOW
-    // public entry fun duel_player2(player2: &signer, player1: address, wager: u64, card: &mut CARD, duel: Duel) {
-    //     assert!(coin::balance<DuelToken>(signer::address_of(player2)) >= wager, ERR_INSUFFICIENT_FUNDS);
-    //     assert!(player1 == duel.player, ERR_INCORRECT_OPPONENT);
-
-    //     let player2_wager = coin::withdraw<DuelToken>(player2, wager);
+        let player2_wager = coin::withdraw<DuelToken>(player2, wager);
         
-    //     let player1_net_power = duel.player_card.power * duel.player_card.multiplier;
-    //     let player2_net_power = card.power * card.multiplier;
+        let player1_net_power = duel.player_card.power * duel.player_card.multiplier;
+        let player2_net_power = card.power * card.multiplier;
 
-    //     let win_sum = player1_net_power + player2_net_power;
+        let win_sum = player1_net_power + player2_net_power;
 
-    //     let random_winner = timestamp::now_microseconds() % win_sum;
+        let random_winner = timestamp::now_microseconds() % win_sum;
 
-    //     coin::merge<DuelToken>(&mut player2_wager, duel.wager);
+        coin::merge<DuelToken>(&mut player2_wager, duel.wager);
 
-    //     if (random_winner <= player1_net_power) {
-    //         duel.player_card.power = duel.player_card.power + card.power;
-    //         coin::deposit<DuelToken>(player1, player2_wager);
-    //     } else {
-    //         card.power = card.power + duel.player_card.power;
-    //         coin::deposit<DuelToken>(signer::address_of(player2), player2_wager);
-    //     }
-    // }
+        if (random_winner <= player1_net_power) {
+            duel.player_card.power = duel.player_card.power + card.power;
+            coin::deposit<DuelToken>(player1, player2_wager);
+        } else {
+            card.power = card.power + duel.player_card.power;
+            coin::deposit<DuelToken>(signer::address_of(player2), player2_wager);
+        }
+    }
 
     // Mint duel tokens to wager in games!
     public entry fun mint_token(player: &signer, amount: u64) acquires Capabilities {

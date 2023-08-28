@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import './App.css';
 import { Types, AptosClient } from 'aptos';
 
-const gameAddress = '0x61315d864828f1508e77744a0f05c26bb10dafbe8a669b894eefb2114016e7f6'
+const gameAddress = '0x799902e6f41813f4a291c1260315487a5983d2b66b8fb342bb8bef27f0a916ba';
 
 function App() {
   // Retrieve aptos.account on initial render and store it.
@@ -24,11 +24,12 @@ function App() {
       return { aptos: [], sui: [] };
     }
 
-    const data = await window.martian.connect();
-
-    const { result } = data;
-    const address = result.aptos[0].address;
-    const publicKey = result.aptos[0].publicKey;
+    const data = await await window.martian.connect();
+    // console.log(data);
+    // const { result } =  data;
+    // console.log(result);
+    const address = data.address;
+    const publicKey = data.publicKey;
     setAddress(address);
     setPublicKey(publicKey);
   } catch (e) {
@@ -41,6 +42,7 @@ function App() {
   }, []);
 
   const mintToken = async(amount: string) => {
+    try{
     const payload = {
       function: `${gameAddress}::game::mint_token`,
       type_arguments: [],
@@ -51,8 +53,13 @@ function App() {
     const result = await window.martian.generateSignAndSubmitTransaction(address, payload);
     console.log(result);
   }
+  catch{
+    console.log('some error occured');
+  }
+  }
 
   const mintCard = async(name: string, description: string) => {
+    try{
     const payload = {
       function: `${gameAddress}::game::mint_card`,
       type_arguments: [],
@@ -63,16 +70,22 @@ function App() {
     const result = await window.martian.generateSignAndSubmitTransaction(address, payload);
     console.log(result);
   }
+  catch{
+    console.log('some error occured');
+  }
+  }
+  
 
   return (
     <div className="App">
-      <p>Account Address: <code>{ address }</code></p>
-      <p>Account Public Key: <code>{ publicKey }</code></p>
-      <input type="text" id="tokenAmount" placeholder="Token Amount" value={tokenAmount} onChange={(v) => setTokenAmount(v.target.value)}/>
-      <button onClick={() => mintToken(tokenAmount)}> Click to Mint Tokens! </button>
-      <input type="text" id="cardName" placeholder="Card Name" value={cardName} onChange={(v) => setCardName(v.target.value)}/>
-      <input type="text" id="cardDescription" placeholder="Card Description" value={cardDescription} onChange={(v) => setCardDescription(v.target.value)}/>
-      <button onClick={() => mintCard(cardName, cardDescription)}> Click to Mint Card! </button>
+      <h1 className="header">The Duel Game</h1>
+      <p className='wallet'>Account Address: <code>{ address }</code></p>
+      <p className='wallet'>Account Public Key: <code>{ publicKey }</code></p>
+      <input className='main' type="text" id="tokenAmount" placeholder="Token Amount" value={tokenAmount} onChange={(v) => setTokenAmount(v.target.value)}/>
+      <button className='button' onClick={() => mintToken(tokenAmount)}> Click to Mint Tokens! </button>
+      <input className='main' type="text" id="cardName" placeholder="Card Name" value={cardName} onChange={(v) => setCardName(v.target.value)}/>
+      <input className='main' type="text" id="cardDescription" placeholder="Card Description" value={cardDescription} onChange={(v) => setCardDescription(v.target.value)}/>
+      <button className='button' onClick={() => mintCard(cardName, cardDescription)}> Click to Mint Card! </button>
     </div>
   );
 }
